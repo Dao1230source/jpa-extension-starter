@@ -8,8 +8,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.hibernate.Session;
-import org.source.jpa.enhance.annotation.UseFilter;
-import org.source.jpa.enhance.enums.FilterEnum;
+import org.source.jpa.enhance.annotation.Filters;
 import org.source.utility.utils.Streams;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -26,26 +25,19 @@ public class FilterAop {
     private EntityManager em;
 
     @Around(value = "@annotation(filter)")
-    public Object prefer(ProceedingJoinPoint point, UseFilter filter) throws Throwable {
-        FilterEnum[] filters = filter.filter();
-        String[] filterNames = Streams.of(filters).map(FilterEnum::getName).toArray(String[]::new);
+    public Object enableFilters(ProceedingJoinPoint point, Filters filter) throws Throwable {
         Session session = null;
         try {
-            if (filters.length > 0) {
-                session = em.unwrap(Session.class);
-                for (String filterName : filterNames) {
-                    session.enableFilter(filterName);
-                }
+            if (Objects.nonNull(session = em.unwrap(Session.class))) {
+                Streams.of(filter.filter()).forEach(session::enableFilter);
             }
             return point.proceed();
         } catch (Throwable e) {
-            log.error("proceed() execute exception after add filters.", e);
+            log.error("enableFilters exception.", e);
             throw e;
         } finally {
             if (Objects.nonNull(session)) {
-                for (String filterName : filterNames) {
-                    session.disableFilter(filterName);
-                }
+                Streams.of(filter.filter()).forEach(session::disableFilter);
             }
         }
     }

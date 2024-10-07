@@ -106,28 +106,25 @@ public abstract class AbstractJpaHelper<T, ID> {
         return repository.findOne(specification).orElseThrow(BaseExceptionEnum.RECORD_NOT_FOUND::except);
     }
 
-    /**
-     * 不能按照 sonar 提示改为 final 方法，会导致spring代理无法代理
-     *
-     * @param exception  EnumProcessor
-     * @param conditions conditions
-     * @return T
-     */
-    public T getOne(Conditions<T> conditions, EnumProcessor<?> exception) {
-        String notFoundMessage = conditions.toPlainString();
-        return repository.findOne(conditions.and()).orElseThrow(() -> exception.except(notFoundMessage));
+    public T getOne(Specification<T> specification, EnumProcessor<?> exception) {
+        return repository.findOne(specification).orElseThrow(exception::except);
     }
 
     public T getOne(Conditions<T> conditions) {
         return getOne(conditions, BaseExceptionEnum.RECORD_NOT_FOUND);
     }
 
-    public <V> T getOne(SFunction<T, V> field, V value, EnumProcessor<?> exception) {
-        return getOne(Conditions.<T>build().add(ExpressionEnum.EQ.of(field, value)), exception);
+    public T getOne(Conditions<T> conditions, EnumProcessor<?> exception) {
+        String notFoundMessage = conditions.toPlainString();
+        return repository.findOne(conditions.and()).orElseThrow(() -> exception.except(notFoundMessage));
     }
 
     public <V> T getOne(SFunction<T, V> field, V value) {
-        return getOne(Conditions.<T>build().add(ExpressionEnum.EQ.of(field, value)), BaseExceptionEnum.RECORD_NOT_FOUND);
+        return getOne(Conditions.eq(field, value), BaseExceptionEnum.RECORD_NOT_FOUND);
+    }
+
+    public <V> T getOne(SFunction<T, V> field, V value, EnumProcessor<?> exception) {
+        return getOne(Conditions.eq(field, value), exception);
     }
 
     public T getOne(T t) {
@@ -172,7 +169,6 @@ public abstract class AbstractJpaHelper<T, ID> {
         T t1 = presentCheck(t, operate);
         return getOne(t1, Jsons.str(t1));
     }
-
 
     protected T presentCheck(T t, OperateEnum operate) {
         Objects.requireNonNull(operate, "operate must not null");

@@ -4,9 +4,9 @@ public class FilterConstant {
     private FilterConstant() {
     }
 
-    public static final String UNDELETED = "UNDELETED";
-    public static final String PREFERRED = "PREFERRED";
+    public static final String NOT_DELETED = "NOT_DELETED";
+    public static final String IS_DEFAULTED = "IS_DEFAULTED";
     public static final String USABLE = "USABLE";
     public static final String PERMISSION = "PERMISSION";
-    public static final String USER_ID = "userId";
+    public static final String SPACE_IDS = "spaceIds";
 }

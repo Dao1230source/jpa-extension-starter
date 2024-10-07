@@ -5,6 +5,7 @@ import org.source.utility.function.SFunction;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -26,6 +27,14 @@ public record Condition<T, V>(ExpressionEnum expressionEnum, SFunction<T, V> fie
 
     public Object obtainValue() {
         return this.expressionEnum.obtainValue(this.values);
+    }
+
+    public static <T, V> Condition<T, V> eq(SFunction<T, V> field, V value) {
+        return new Condition<>(ExpressionEnum.EQ, field, value);
+    }
+
+    public static <T, V> Condition<T, V> in(SFunction<T, V> field, Collection<V> values) {
+        return new Condition<>(ExpressionEnum.IN, field, values.toArray());
     }
 
     @Override

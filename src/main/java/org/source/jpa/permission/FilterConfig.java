@@ -2,6 +2,7 @@ package org.source.jpa.permission;
 
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
 import org.source.jpa.enhance.FilterConstant;
@@ -16,12 +17,22 @@ import org.springframework.context.annotation.Role;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import java.util.Collection;
+
 import static org.source.jpa.permission.PermissionConstant.PERMISSION_FLAG;
 
+@AllArgsConstructor
 @Slf4j
 @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 @AutoConfiguration
 public class FilterConfig {
+    private final PermissionProcessor permissionProcessor;
+
+    @ConditionalOnMissingBean
+    @Bean
+    public PermissionProcessor permissionProcessor() {
+        return new DefaultPermissionProcessor();
+    }
 
     @Bean
     @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
@@ -44,10 +55,11 @@ public class FilterConfig {
                 if (Boolean.TRUE.equals(PERMISSION_FLAG.get())) {
                     Session session = entityManager.unwrap(Session.class);
                     String userId = TraceContext.getUserId();
+                    Collection<String> spaceIds = permissionProcessor.getSpaceIdsByUserId(userId);
                     if (log.isDebugEnabled()) {
-                        log.debug("EntityManager set permission userId:{}", userId);
+                        log.debug("filter permission by userId:{}, spaceIds:{}", userId, spaceIds);
                     }
-                    session.enableFilter(FilterConstant.PERMISSION).setParameter(FilterConstant.USER_ID, userId);
+                    session.enableFilter(FilterConstant.PERMISSION).setParameter(FilterConstant.SPACE_IDS, spaceIds);
                 }
                 return entityManager;
             }

@@ -13,6 +13,7 @@ import java.util.List;
 @AutoConfigureBefore(HibernateConfig.class)
 @AutoConfiguration
 public class ExtendPackagesConfig {
+
     @Bean
     public ExtendPackagesProcessor permission() {
         return new ExtendPackagesProcessor() {
