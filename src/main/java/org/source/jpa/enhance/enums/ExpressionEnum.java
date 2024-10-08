@@ -1,8 +1,10 @@
 package org.source.jpa.enhance.enums;
 
-import org.source.jpa.enhance.condition.Condition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.source.utility.enums.BaseExceptionEnum;
 import org.source.utility.function.SFunction;
+import org.source.utility.utils.Jsons;
 import org.source.utility.utils.Lambdas;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -12,17 +14,21 @@ import java.util.Objects;
 import java.util.function.Function;
 
 public enum ExpressionEnum {
+
     EQ {
         @Override
-        public <T, V> Function<Object, Specification<T>> express(SFunction<T, V> field) {
-            String fieldName = obtainFieldName(field);
+        public <T> Function<Object, Specification<T>> express(String fieldName) {
             return value -> (root, cq, cb) -> cb.equal(root.get(fieldName), value);
+        }
+
+        @Override
+        public String sqlSymbol() {
+            return "=";
         }
     },
     IN {
         @Override
-        public <T, V> Function<Object, Specification<T>> express(SFunction<T, V> field) {
-            String fieldName = obtainFieldName(field);
+        public <T> Function<Object, Specification<T>> express(String fieldName) {
             return value -> (root, cq, cb) -> root.get(fieldName).in((Collection<?>) value);
         }
 
@@ -34,9 +40,22 @@ public enum ExpressionEnum {
             }
             return List.of(values);
         }
+
+        @Override
+        public String sqlSymbol() {
+            return "in";
+        }
     };
 
-    public abstract <T, V> Function<Object, Specification<T>> express(SFunction<T, V> field);
+    final Logger log = LoggerFactory.getLogger(ExpressionEnum.class);
+
+    public abstract <T> Function<Object, Specification<T>> express(String fieldName);
+
+    public <T, V> String obtainColumnName(SFunction<T, V> field) {
+        String fieldName = Lambdas.getFieldName(field);
+        BaseExceptionEnum.NOT_NULL.notEmpty(fieldName, "未能正确的获取到字段名称");
+        return fieldName;
+    }
 
     public Object obtainValue(Object... values) {
         if (Objects.nonNull(values) && values.length == 1 && Objects.nonNull(values[0])) {
@@ -44,6 +63,8 @@ public enum ExpressionEnum {
         }
         throw BaseExceptionEnum.NOT_NULL.except("参数有且只能有一个");
     }
+
+    public abstract String sqlSymbol();
 
     /**
      * 生成 Specification
@@ -55,17 +76,13 @@ public enum ExpressionEnum {
      * @return Specification
      */
     public final <T, V> Specification<T> express(SFunction<T, V> field, Object... values) {
-        return this.express(field).apply(obtainValue(values));
-    }
-
-    public <T, V> Condition<T, V> of(SFunction<T, V> field, Object... values) {
-        return new Condition<>(this, field, values);
-    }
-
-    public static <T, V> String obtainFieldName(SFunction<T, V> field) {
-        String fieldName = Lambdas.getFieldName(field);
-        BaseExceptionEnum.NOT_NULL.notEmpty(fieldName, "未能正确的获取到字段名称");
-        return fieldName;
+        String columnName = obtainColumnName(field);
+        Function<Object, Specification<T>> express = this.express(columnName);
+        Object fieldValue = obtainValue(values);
+        if (log.isDebugEnabled()) {
+            log.debug("sql expression: {} {} {}", columnName, this.sqlSymbol(), Jsons.str(fieldValue));
+        }
+        return express.apply(fieldValue);
     }
 
 }

@@ -3,7 +3,6 @@ package org.source.jpa.enhance;
 import lombok.Getter;
 import org.source.jpa.enhance.annotation.CheckPresent;
 import org.source.jpa.enhance.annotation.LogicDelete;
-import org.source.jpa.enhance.condition.Conditions;
 import org.source.jpa.enhance.enums.ExpressionEnum;
 import org.source.jpa.enhance.enums.OperateEnum;
 import org.source.jpa.repository.UnifiedJpaRepository;
@@ -110,21 +109,20 @@ public abstract class AbstractJpaHelper<T, ID> {
         return repository.findOne(specification).orElseThrow(exception::except);
     }
 
-    public T getOne(Conditions<T> conditions) {
-        return getOne(conditions, BaseExceptionEnum.RECORD_NOT_FOUND);
+    public T getOne(Condition<T> condition) {
+        return getOne(condition, BaseExceptionEnum.RECORD_NOT_FOUND);
     }
 
-    public T getOne(Conditions<T> conditions, EnumProcessor<?> exception) {
-        String notFoundMessage = conditions.toPlainString();
-        return repository.findOne(conditions.and()).orElseThrow(() -> exception.except(notFoundMessage));
+    public T getOne(Condition<T> condition, EnumProcessor<?> exception) {
+        return repository.findOne(condition.getSpecification()).orElseThrow(exception::except);
     }
 
     public <V> T getOne(SFunction<T, V> field, V value) {
-        return getOne(Conditions.eq(field, value), BaseExceptionEnum.RECORD_NOT_FOUND);
+        return getOne(new Condition<T>().eq(field, value), BaseExceptionEnum.RECORD_NOT_FOUND);
     }
 
     public <V> T getOne(SFunction<T, V> field, V value, EnumProcessor<?> exception) {
-        return getOne(Conditions.eq(field, value), exception);
+        return getOne(new Condition<T>().eq(field, value), exception);
     }
 
     public T getOne(T t) {
@@ -155,8 +153,8 @@ public abstract class AbstractJpaHelper<T, ID> {
         return repository.findAll(specification);
     }
 
-    public List<T> findAll(Conditions<T> conditions) {
-        return repository.findAll(conditions.and());
+    public List<T> findAll(Condition<T> condition) {
+        return repository.findAll(condition.getSpecification());
     }
 
     public void throwIfPresent(T t, OperateEnum operate) {
