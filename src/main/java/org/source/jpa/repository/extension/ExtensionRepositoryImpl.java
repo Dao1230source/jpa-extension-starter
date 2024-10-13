@@ -179,9 +179,9 @@ public class ExtensionRepositoryImpl<T, I> extends SimpleJpaRepository<T, I> imp
         List<ColumnField> columnFieldList = new ArrayList<>();
         Arrays.stream(entityClass.getDeclaredFields()).forEach(f -> {
             ReflectionUtils.makeAccessible(f);
-            ExtensibleValue extensibleValue = ExtensibleValue.of(f.getAnnotation(Extensible.class));
             Column column = f.getAnnotation(Column.class);
             String columnName = column != null ? column.name() : Strings.humpToUnderline(f.getName());
+            ExtensibleValue extensibleValue = ExtensibleValue.of(columnName, f.getAnnotation(Extensible.class));
             if (f.isAnnotationPresent(Column.class) || f.isAnnotationPresent(Id.class)) {
                 columnFieldList.add(new ColumnField(columnName, f.getName(), extensibleValue, embeddedFieldNames));
             } else if (f.isAnnotationPresent(Embedded.class)) {
@@ -244,11 +244,21 @@ public class ExtensionRepositoryImpl<T, I> extends SimpleJpaRepository<T, I> imp
             this.updatable = extensible.updatable();
         }
 
-        public static ExtensibleValue of(Extensible extensible) {
+        public static ExtensibleValue of(String columnName, Extensible extensible) {
             if (Objects.nonNull(extensible)) {
                 return new ExtensibleValue(extensible);
             }
-            return new ExtensibleValue(true, true);
+            if (Constants.COLUMN_ID.equals(columnName)) {
+                return new ExtensibleValue(false, false);
+            } else if (Constants.COLUMN_CREATE_USER.equals(columnName)) {
+                return new ExtensibleValue(true, false);
+            } else if (Constants.COLUMN_CREATE_TIME.equals(columnName)) {
+                return new ExtensibleValue(false, false);
+            } else if (Constants.COLUMN_UPDATE_TIME.equals(columnName)) {
+                return new ExtensibleValue(false, false);
+            } else {
+                return new ExtensibleValue(true, true);
+            }
         }
     }
 
