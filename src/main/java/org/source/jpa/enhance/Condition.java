@@ -2,10 +2,12 @@ package org.source.jpa.enhance;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.source.jpa.enhance.enums.ExpressionEnum;
 import org.source.utility.function.SFunction;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.util.Collection;
 import java.util.Objects;
 
 @Getter
@@ -44,8 +46,22 @@ public class Condition<T> {
         return this.and(ExpressionEnum.EQ.express(field, value));
     }
 
-    public <V> Condition<T> in(SFunction<T, V> field, Iterable<V> values) {
+    public <V> Condition<T> in(SFunction<T, V> field, Collection<V> values) {
         return this.and(ExpressionEnum.IN.express(field, values));
+    }
+
+    public <V> Condition<T> eqIfPresent(SFunction<T, V> field, V value) {
+        if (Objects.isNull(value)) {
+            return this;
+        }
+        return this.eq(field, value);
+    }
+
+    public <V> Condition<T> inIfPresent(SFunction<T, V> field, Collection<V> values) {
+        if (CollectionUtils.isEmpty(values)) {
+            return this;
+        }
+        return this.in(field, values);
     }
 
     public Condition<T> or(Condition<T> condition) {
