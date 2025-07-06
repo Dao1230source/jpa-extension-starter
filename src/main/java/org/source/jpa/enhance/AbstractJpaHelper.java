@@ -21,19 +21,23 @@ import org.springframework.util.CollectionUtils;
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 
 /**
- * @author zengfugen
- */
+* @author zengfugen
+*/
 @Getter
 @Transactional(readOnly = true)
-public abstract class AbstractJpaHelper<T, ID> {
-    protected final UnifiedJpaRepository<T, ID> repository;
+public abstract class AbstractJpaHelper<T, I> {
+    private static final Map<Class<?>, Field[]> CHECK_PRESENT_FIELDS = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, Field> LOGIC_DELETE_FIELD = new ConcurrentHashMap<>();
+
+    protected final UnifiedJpaRepository<T, I> repository;
     protected List<String> fieldNamesCanAutoSetUserId;
 
-    protected AbstractJpaHelper(UnifiedJpaRepository<T, ID> repository) {
+    protected AbstractJpaHelper(UnifiedJpaRepository<T, I> repository) {
         this.repository = repository;
         this.fieldNamesCanAutoSetUserId = new ArrayList<>(List.of("createUser", "updateUser"));
     }
@@ -52,15 +56,30 @@ public abstract class AbstractJpaHelper<T, ID> {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public T delete(T t) {
-        T fromDb = throwIfAbsent(t, OperateEnum.DELETE);
-        T deleted = this.logicDelete(fromDb);
-        return repository.save(deleted);
+    public void delete(T t) {
+        T t1 = presentCheck(t, OperateEnum.DELETE);
+        findOne(t1).ifPresent(fromDb -> {
+            T deleted = this.logicDelete(fromDb);
+            repository.save(deleted);
+        });
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void delete(Condition<T> condition) {
+        List<T> entities = findAll(condition);
+        entities.forEach(this::logicDelete);
+        repository.saveAll(entities);
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void remove(T t) {
-        repository.delete(t);
+        T t1 = presentCheck(t, OperateEnum.DELETE);
+        findOne(t1).ifPresent(repository::delete);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void remove(Condition<T> condition) {
+        repository.delete(condition.getSpecification());
     }
 
 
@@ -173,10 +192,11 @@ public abstract class AbstractJpaHelper<T, ID> {
         @SuppressWarnings("unchecked")
         T o = (T) Reflects.newInstance(t.getClass());
         // 保留用于校验记录是否存在的字段
-        Field[] presentFields = Reflects.getFieldsByAnnotation(t.getClass(), CheckPresent.class, a -> {
+        Field[] presentFields = CHECK_PRESENT_FIELDS.computeIfAbsent(t.getClass(),
+                cls -> Reflects.getFieldsByAnnotation(cls, CheckPresent.class, a -> {
                     Set<OperateEnum> operations = Arrays.stream(a.operate()).collect(Collectors.toSet());
                     return operations.contains(OperateEnum.ALL) || operations.contains(operate);
-                }
+                })
         );
         if (presentFields.length == 0) {
             return t;
@@ -193,9 +213,9 @@ public abstract class AbstractJpaHelper<T, ID> {
     }
 
     protected T logicDelete(T t) {
-        Field field = Streams.of(t.getClass().getDeclaredFields())
+        Field field = LOGIC_DELETE_FIELD.computeIfAbsent(t.getClass(), cls -> Streams.of(t.getClass().getDeclaredFields())
                 .filter(f -> f.isAnnotationPresent(LogicDelete.class)).findFirst()
-                .orElseThrow(() -> BizExceptionEnum.NOT_EXISTS_DELETE_COLUMN.except(t.getClass().getSimpleName()));
+                .orElseThrow(() -> BizExceptionEnum.NOT_EXISTS_DELETE_COLUMN.except(t.getClass().getSimpleName())));
         LogicDelete logicDelete = field.getAnnotation(LogicDelete.class);
         Reflects.setFieldValue(t, field, logicDelete.deletedValue());
         return t;
