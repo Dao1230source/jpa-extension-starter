@@ -1,7 +1,6 @@
 package org.source.jpa.repository.registrar;
 
-import org.jetbrains.annotations.NotNull;
-import org.source.spring.scan.ExtendPackagesProcessor;
+// import org.source.spring.scan.ExtendPackagesProcessor;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
@@ -16,12 +15,12 @@ import java.lang.annotation.Annotation;
 
 public class ExtendJpaRepositoriesRegistrar extends RepositoryBeanDefinitionRegistrarSupport {
     @Override
-    protected @NotNull Class<? extends Annotation> getAnnotation() {
+    protected Class<? extends Annotation> getAnnotation() {
         return ExtendJpaRepositories.class;
     }
 
     @Override
-    protected @NotNull RepositoryConfigurationExtension getExtension() {
+    protected RepositoryConfigurationExtension getExtension() {
         return new JpaRepositoryConfigExtension();
     }
 
@@ -29,21 +28,21 @@ public class ExtendJpaRepositoriesRegistrar extends RepositoryBeanDefinitionRegi
     private Environment environment;
 
     @Override
-    public void setResourceLoader(@NotNull ResourceLoader resourceLoader) {
+    public void setResourceLoader(ResourceLoader resourceLoader) {
         super.setResourceLoader(resourceLoader);
         this.resourceLoader = resourceLoader;
     }
 
     @Override
-    public void setEnvironment(@NotNull Environment environment) {
+    public void setEnvironment(Environment environment) {
         super.setEnvironment(environment);
         this.environment = environment;
     }
 
     @Override
-    public void registerBeanDefinitions(@NotNull AnnotationMetadata metadata,
-                                        @NotNull BeanDefinitionRegistry registry,
-                                        @NotNull BeanNameGenerator generator) {
+    public void registerBeanDefinitions(AnnotationMetadata metadata,
+                                        BeanDefinitionRegistry registry,
+                                        BeanNameGenerator generator) {
         Assert.notNull(metadata, "AnnotationMetadata must not be null");
         Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
         Assert.notNull(resourceLoader, "ResourceLoader must not be null");
@@ -60,9 +59,9 @@ public class ExtendJpaRepositoriesRegistrar extends RepositoryBeanDefinitionRegi
                 configurationSource, resourceLoader, environment);
         delegate.registerRepositoriesIn(registry, extension);
         // 注册 bean
-        if (registry instanceof BeanFactory beanFactory) {
-            ExtendPackagesProcessor.extendPackagesProcessorList(beanFactory, ExtendJpaRepositories.class)
-                    .forEach(k -> k.after(beanFactory));
-        }
+        // if (registry instanceof BeanFactory beanFactory) {
+        //     ExtendPackagesProcessor.extendPackagesProcessorList(beanFactory, ExtendJpaRepositories.class)
+        //             .forEach(k -> k.after(beanFactory));
+        // }
     }
 }

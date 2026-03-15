@@ -3,8 +3,11 @@ package org.source.jpa;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.source.jpa.enhance.AbstractJpaHelper;
+import org.source.jpa.exception.JpaExtException;
+import org.source.jpa.exception.JpaExtExceptionEnum;
 import org.source.jpa.repository.registrar.ExtendJpaRepositories;
-import org.source.spring.scan.ExtendPackagesProcessor;
+// import org.source.spring.scan.ExtendPackagesProcessor;
+import org.source.utility.exception.BaseException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -33,11 +36,12 @@ public class HibernateConfig {
     @Primary
     @Bean
     public PersistenceManagedTypes persistenceManagedTypes(BeanFactory beanFactory, ResourceLoader resourceLoader) {
-        List<String> packages = new ArrayList<>();
-        // jpa-help-starter 的 @FilterDef定义在该包下
-        packages.add(ClassUtils.getPackageName(AbstractJpaHelper.class.getName()));
-        packages.addAll(ExtendPackagesProcessor.getPackagesWithApp(beanFactory, HibernateConfig.class));
-        String[] packagesToScan = StringUtils.toStringArray(packages);
-        return new PersistenceManagedTypesScanner(resourceLoader).scan(packagesToScan);
+        // List<String> packages = new ArrayList<>();
+        // // jpa-help-starter 的 @FilterDef定义在该包下
+        // packages.add(ClassUtils.getPackageName(AbstractJpaHelper.class.getName()));
+        // packages.addAll(ExtendPackagesProcessor.getPackagesWithApp(beanFactory, HibernateConfig.class));
+        // String[] packagesToScan = StringUtils.toStringArray(packages);
+        // return new PersistenceManagedTypesScanner(resourceLoader).scan(packagesToScan);
+        return null;
     }
 }

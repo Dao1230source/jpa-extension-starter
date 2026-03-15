@@ -61,7 +61,7 @@ public enum ExpressionEnum {
         if (Objects.nonNull(values) && values.length == 1 && Objects.nonNull(values[0])) {
             return values[0];
         }
-        throw BaseExceptionEnum.NOT_NULL.except("参数有且只能有一个");
+        throw BaseExceptionEnum.NOT_NULL.newException("参数有且只能有一个");
     }
 
     public abstract String sqlSymbol();

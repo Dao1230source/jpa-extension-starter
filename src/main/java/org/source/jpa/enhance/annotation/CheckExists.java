@@ -10,7 +10,7 @@ import java.lang.annotation.*;
 @Documented
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface CheckPresent {
+public @interface CheckExists {
 
     /**
      * 在什么操作中生效
