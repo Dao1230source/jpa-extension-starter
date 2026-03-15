@@ -2,12 +2,7 @@ package org.source.jpa;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.source.jpa.enhance.AbstractJpaHelper;
-import org.source.jpa.exception.JpaExtException;
-import org.source.jpa.exception.JpaExtExceptionEnum;
 import org.source.jpa.repository.registrar.ExtendJpaRepositories;
-// import org.source.spring.scan.ExtendPackagesProcessor;
-import org.source.utility.exception.BaseException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
@@ -16,12 +11,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.orm.jpa.persistenceunit.PersistenceManagedTypes;
-import org.springframework.orm.jpa.persistenceunit.PersistenceManagedTypesScanner;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 该配置主要是为了是jpa可以扫描到 "org.source.jpa"下”package-info.java“定义的 @FilterDef 以便在其被依赖的地方使用 hibernate Filter

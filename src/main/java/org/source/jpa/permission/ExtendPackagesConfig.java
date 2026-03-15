@@ -1,14 +1,8 @@
 package org.source.jpa.permission;
 
-import org.jetbrains.annotations.NotNull;
 import org.source.jpa.HibernateConfig;
-// import org.source.spring.scan.ExtendPackagesProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
-import org.springframework.context.annotation.Bean;
-import org.springframework.util.ClassUtils;
-
-import java.util.List;
 
 @AutoConfigureBefore(HibernateConfig.class)
 @AutoConfiguration

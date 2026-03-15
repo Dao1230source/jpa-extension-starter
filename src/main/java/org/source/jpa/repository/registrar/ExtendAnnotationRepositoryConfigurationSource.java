@@ -1,7 +1,6 @@
 package org.source.jpa.repository.registrar;
 
-// import org.source.spring.scan.ExtendPackagesProcessor;
-import org.springframework.beans.factory.BeanFactory;
+
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.core.env.Environment;
@@ -11,7 +10,6 @@ import org.springframework.data.repository.config.AnnotationRepositoryConfigurat
 import org.springframework.data.util.Streamable;
 
 import java.lang.annotation.Annotation;
-import java.util.List;
 
 public class ExtendAnnotationRepositoryConfigurationSource extends AnnotationRepositoryConfigurationSource {
     private final BeanDefinitionRegistry registry;

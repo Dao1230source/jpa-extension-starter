@@ -1,7 +1,6 @@
 package org.source.jpa.repository.registrar;
 
-// import org.source.spring.scan.ExtendPackagesProcessor;
-import org.springframework.beans.factory.BeanFactory;
+
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.core.env.Environment;
