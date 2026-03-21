@@ -2,9 +2,9 @@ package org.source.jpa.exception;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import org.jetbrains.annotations.Nullable;
 import org.source.utility.exception.BaseException;
 import org.source.utility.exception.EnumProcessor;
+import org.springframework.lang.Nullable;
 
 /**
  * spring extension exception

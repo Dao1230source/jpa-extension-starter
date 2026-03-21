@@ -1,12 +1,12 @@
 package org.source.jpa.repository.extension;
 
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
 import org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean;
+import org.springframework.lang.NonNull;
 
 /**
  * <pre>
@@ -22,7 +22,7 @@ import org.springframework.data.jpa.repository.support.JpaRepositoryFactoryBean;
 @AutoConfiguration
 public class RepositoryConfig implements BeanPostProcessor {
     @Override
-    public Object postProcessBeforeInitialization(@NotNull Object bean, @NotNull String beanName) throws BeansException {
+    public Object postProcessBeforeInitialization(@NonNull Object bean, @NonNull String beanName) throws BeansException {
         if (bean instanceof JpaRepositoryFactoryBean<?, ?, ?> jpaRepositoryFactoryBean) {
             jpaRepositoryFactoryBean.setRepositoryBaseClass(ExtensionRepositoryImpl.class);
         }

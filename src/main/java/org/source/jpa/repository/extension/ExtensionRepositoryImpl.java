@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.source.utility.constant.Constants;
-import org.source.utility.utils.Reflects;
 import org.source.utility.utils.Streams;
 import org.source.utility.utils.Strings;
 import org.springframework.data.jpa.repository.Modifying;
@@ -19,6 +18,7 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -68,11 +68,17 @@ public class ExtensionRepositoryImpl<T, I> extends SimpleJpaRepository<T, I> imp
         if (!CollectionUtils.isEmpty(columnField.embeddedFieldNames)) {
             Iterator<String> iterator = columnField.embeddedFieldNames.iterator();
             while (iterator.hasNext() && Objects.nonNull(obj)) {
-                obj = Reflects.getFieldValue(obj, iterator.next());
+                Field field = ReflectionUtils.findField(obj.getClass(), iterator.next());
+                if (Objects.nonNull(field)) {
+                    obj = ReflectionUtils.getField(field, obj);
+                }
             }
         }
         if (Objects.nonNull(obj)) {
-            return Reflects.getFieldValue(obj, columnField.getFieldName());
+            Field field = ReflectionUtils.findField(obj.getClass(), columnField.getFieldName());
+            if (Objects.nonNull(field)) {
+                return ReflectionUtils.getField(field, obj);
+            }
         }
         return null;
     }

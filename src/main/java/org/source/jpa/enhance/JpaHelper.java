@@ -126,6 +126,10 @@ public interface JpaHelper<T, I> {
     /*
     get 查询单条数据，没查询到数据报错
      */
+    default T getById(I id) {
+        return findById(id).orElseThrow(BaseExceptionEnum.RECORD_NOT_FOUND::newException);
+    }
+
     default T getById(I id, Supplier<BaseException> exceptionSupplier) {
         return findById(id).orElseThrow(exceptionSupplier);
     }
