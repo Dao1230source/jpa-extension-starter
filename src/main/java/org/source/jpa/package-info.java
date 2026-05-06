@@ -1,4 +1,4 @@
 @NonNullApi
-package org.source.jpa.repository.registrar;
+package org.source.jpa;
 
 import org.springframework.lang.NonNullApi;

@@ -1,4 +1,3 @@
-org.source.jpa.HibernateConfig
-org.source.jpa.repository.extension.RepositoryConfig
-org.source.jpa.enhance.FilterAop
-org.source.jpa.permission.ExtendPackagesConfig
+org.source.jpa.JpaBaseConfig
+org.source.jpa.JpaRepositoriesConfig
+org.source.jpa.permission.FilterAop
